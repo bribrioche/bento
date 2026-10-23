@@ -1,0 +1,81 @@
+{
+  "name": "lumen-markdown",
+  "version": "1.0.1",
+  "description": "A calm Markdown reader for the desktop.",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "author": "Bryan Guillot",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "build": "tsc -b && vite build",
+    "build:icon": "node scripts/build-icon.cjs",
+    "dist": "npm run build:icon && npm run build && electron-builder",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "latest",
+    "@fontsource-variable/newsreader": "latest",
+    "dompurify": "latest",
+    "lucide-react": "latest",
+    "marked": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "concurrently": "latest",
+    "cross-env": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "wait-on": "latest"
+    ,"png-to-ico": "^3.0.1"
+    ,"rcedit": "^5.0.2"
+    ,"sharp": "^0.33.5"
+  },
+  "build": {
+    "appId": "com.bryanguillot.lumenmarkdown",
+    "productName": "Lumen Markdown",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "afterPack": "scripts/after-pack.cjs",
+    "win": {
+      "icon": "public/lumen_logo_default.ico",
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "installerIcon": "public/lumen_logo_default.ico",
+      "uninstallerIcon": "public/lumen_logo_default.ico",
+      "installerHeaderIcon": "public/lumen_logo_default.ico"
+    },
+    "mac": {
+      "icon": "public/lumen_logo_default.png",
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "icon": "public/lumen_logo_default.png",
+      "target": "AppImage",
+      "category": "Office"
+    },
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkd"],
+        "name": "Markdown document",
+        "role": "Viewer"
+      }
+    ]
+  }
+}

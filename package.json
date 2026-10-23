@@ -1,0 +1,16 @@
+{
+  "name": "bento-suite-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bento launcher and its locally buildable app collection",
+  "scripts": {
+    "setup": "npm ci --prefix bento",
+    "dev": "npm run dev --prefix bento",
+    "build:bento": "npm run dist --prefix bento",
+    "check": "npm run check --prefix bento",
+    "clean": "node scripts/clean-workspace.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

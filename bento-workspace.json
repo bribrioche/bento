@@ -1,0 +1,6 @@
+{
+  "name": "Bento Suite",
+  "version": 1,
+  "launcher": "bento",
+  "appsDirectory": "apps"
+}
