@@ -14,6 +14,8 @@ On the first launch, the script installs Bento's development dependencies. In Be
 4. Bento opens the generated Windows installer.
 5. After installation, the app action changes to **Open**.
 
+If you install Bento itself and the catalog shows **Unavailable**, select **Locate sources** and choose this top-level `Bento` folder—the one containing `bento-workspace.json`. Bento remembers that location for future launches.
+
 Subsequent builds reuse `node_modules` and any existing installer, so they are faster.
 
 ## Folder structure
