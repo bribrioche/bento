@@ -68,7 +68,7 @@ Then create Bento's installer:
 npm run dist
 ```
 
-The result is written to `release/Bento Setup 2.0.0.exe`. The release is large because all four installers are embedded for offline use.
+The result is written to `release/Bento Setup 2.0.0.exe`. The release is large because all four installers are embedded for offline use. After a successful build, Bento automatically removes the temporary copies from `vendor/installers` so the source folder stays small. You can also run `npm run clean:installers` manually at any time.
 
 ## Project structure
 

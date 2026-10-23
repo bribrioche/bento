@@ -10,7 +10,8 @@
     "start": "electron .",
     "build:icon": "node scripts/build-icon.cjs",
     "prepare:installers": "node scripts/prepare-installers.cjs",
-    "dist": "npm run prepare:installers && npm run build && electron-builder",
+    "clean:installers": "node scripts/clean-installers.cjs",
+    "dist": "npm run prepare:installers && npm run build && electron-builder && npm run clean:installers",
     "check": "npm run build"
   },
   "engines": {
