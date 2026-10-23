@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('hub', {
   listCatalog: () => ipcRenderer.invoke('catalog:list'),
+  selectWorkspace: () => ipcRenderer.invoke('workspace:select'),
   installCatalogApp: (id) => ipcRenderer.invoke('catalog:install', id),
   launchCatalogApp: (id) => ipcRenderer.invoke('catalog:launch', id),
   listApps: () => ipcRenderer.invoke('apps:list'),

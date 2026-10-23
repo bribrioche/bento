@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Image, LayoutGrid, Library, LoaderCircle, Moon, MoreHorizontal, PackagePlus, Pencil, Plus, Search, Sun, Trash2, X } from 'lucide-react'
+import { Check, FolderOpen, Image, LayoutGrid, Library, LoaderCircle, Moon, MoreHorizontal, PackagePlus, Pencil, Plus, Search, Sun, Trash2, X } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Textarea } from './components/ui/textarea'
@@ -26,6 +26,7 @@ function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('hub-theme') as 'light' | 'dark') || 'light')
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
+  const [locating, setLocating] = useState(false)
   const [workingId, setWorkingId] = useState('')
   const [launchingId, setLaunchingId] = useState('')
   const [editing, setEditing] = useState<HubApp | null>(null)
@@ -50,6 +51,16 @@ function App() {
   const visibleCatalog = useMemo(() => catalog.filter((item) => !term || `${item.name} ${item.description} ${item.category}`.toLowerCase().includes(term)), [catalog, term])
   const visibleApps = useMemo(() => apps.filter((item) => !term || `${item.name} ${item.description || ''} ${item.path}`.toLowerCase().includes(term)).sort((a, b) => a.name.localeCompare(b.name)), [apps, term])
   const installedCount = catalog.filter((item) => item.installed).length
+  const needsWorkspace = catalog.some((item) => !item.installed && !item.sourceAvailable && !item.installerAvailable)
+
+  async function locateWorkspace() {
+    setLocating(true); setError('')
+    try {
+      const next = await window.hub.selectWorkspace()
+      if (next) setCatalog(next)
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not use this workspace folder.') }
+    finally { setLocating(false) }
+  }
 
   async function install(item: CatalogApp) {
     setWorkingId(item.id); setError('')
@@ -112,7 +123,7 @@ function App() {
       {error && <div className="error-banner"><span>{error}</span><Button variant="ghost" size="icon" aria-label="Dismiss" onClick={() => setError('')}><X size={15} /></Button></div>}
 
       <section className="catalog-section">
-        <div className="section-heading"><div><PackagePlus size={15} /><h2>Available in Bento</h2><span className="count">{installedCount}/{catalog.length} installed</span></div></div>
+        <div className="section-heading"><div><PackagePlus size={15} /><h2>Available in Bento</h2><span className="count">{installedCount}/{catalog.length} installed</span></div>{needsWorkspace && <Button variant="secondary" onClick={locateWorkspace} disabled={locating}>{locating ? <LoaderCircle className="spin" size={15} /> : <FolderOpen size={15} />} Locate sources</Button>}</div>
         {loading ? <div className="empty-state compact"><LoaderCircle className="spin" size={25} /><p>Setting the table…</p></div>
         : visibleCatalog.length === 0 ? <div className="empty-state compact"><h3>No catalog apps found</h3><p>Try a different search.</p></div>
         : <div className="catalog-grid">{visibleCatalog.map((item) => <Card className={`catalog-card ${item.installed ? 'is-installed' : ''}`} key={item.id}>

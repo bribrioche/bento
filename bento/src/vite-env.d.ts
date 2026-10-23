@@ -25,6 +25,7 @@ interface CatalogApp {
 
 interface HubApi {
   listCatalog: () => Promise<CatalogApp[]>
+  selectWorkspace: () => Promise<CatalogApp[] | null>
   installCatalogApp: (id: string) => Promise<CatalogApp[]>
   launchCatalogApp: (id: string) => Promise<boolean>
   listApps: () => Promise<HubApp[]>

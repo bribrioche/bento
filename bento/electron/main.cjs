@@ -17,6 +17,7 @@ const catalog = [
 ]
 
 function libraryPath() { return path.join(app.getPath('userData'), 'apps.json') }
+function workspacePreferencePath() { return path.join(app.getPath('userData'), 'workspace.json') }
 async function pathExists(candidate) { try { await fs.access(candidate); return true } catch { return false } }
 async function readLibrary() { try { return JSON.parse(await fs.readFile(libraryPath(), 'utf8')) } catch { return [] } }
 async function writeLibrary(apps) {
@@ -41,18 +42,42 @@ async function refreshLibraryIcons(apps) {
 function titleBarColors(theme) {
   return theme === 'dark' ? { color: '#17191d', symbolColor: '#8d95a3', height: 44 } : { color: '#f6f5f1', symbolColor: '#697180', height: 44 }
 }
-async function findWorkspaceRoot() {
-  const starts = [process.cwd(), __dirname, path.dirname(process.execPath)]
-  for (const start of starts) {
-    let current = path.resolve(start)
-    for (let depth = 0; depth < 8; depth += 1) {
-      if (await pathExists(path.join(current, 'bento-workspace.json'))) return current
-      const parent = path.dirname(current)
-      if (parent === current) break
-      current = parent
-    }
+async function workspaceAt(candidate) {
+  return Boolean(candidate && await pathExists(path.join(candidate, 'bento-workspace.json')))
+}
+async function findMarkerUpward(start) {
+  let current = path.resolve(start)
+  for (let depth = 0; depth < 8; depth += 1) {
+    if (await workspaceAt(current)) return current
+    const parent = path.dirname(current)
+    if (parent === current) break
+    current = parent
   }
   return ''
+}
+async function findWorkspaceRoot() {
+  try {
+    const preference = JSON.parse(await fs.readFile(workspacePreferencePath(), 'utf8'))
+    if (await workspaceAt(preference.path)) return preference.path
+  } catch { /* No saved workspace yet. */ }
+
+  const starts = [process.cwd(), __dirname, path.dirname(process.execPath)]
+  for (const start of starts) {
+    const found = await findMarkerUpward(start)
+    if (found) return found
+  }
+  return ''
+}
+async function selectWorkspace() {
+  const result = await dialog.showOpenDialog(mainWindow, { title: 'Select your Bento workspace', properties: ['openDirectory'] })
+  if (result.canceled || !result.filePaths[0]) return null
+  const selected = path.resolve(result.filePaths[0])
+  let workspace = await findMarkerUpward(selected)
+  if (!workspace && await workspaceAt(path.join(selected, 'Bento'))) workspace = path.join(selected, 'Bento')
+  if (!workspace) throw new Error('This folder is not a Bento workspace. Select the folder containing bento-workspace.json.')
+  await fs.mkdir(app.getPath('userData'), { recursive: true })
+  await fs.writeFile(workspacePreferencePath(), JSON.stringify({ path: workspace }, null, 2), 'utf8')
+  return getCatalog()
 }
 async function sourceProjectPath(item) {
   const workspace = await findWorkspaceRoot()
@@ -147,6 +172,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   ipcMain.handle('catalog:list', getCatalog)
+  ipcMain.handle('workspace:select', selectWorkspace)
   ipcMain.handle('catalog:install', async (_event, id) => {
     const item = catalog.find((entry) => entry.id === id)
     if (!item) throw new Error('This app is not in the Bento catalog.')
